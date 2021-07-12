@@ -1,2 +1,3 @@
 # snake Game
-<a href="https://amankhalsa.github.io/snake/"> Snake game</a>
+# You can play this game using computer keyboard
+<a href="https://amankhalsa.github.io/snake/" target="_blank"> Snake game</a>
