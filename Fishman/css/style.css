@@ -67,7 +67,7 @@
      /*background: url("../img/1st.jpg");*/
      /*background: url("../img/ZKZl.gif");*/
 
-    background: url("../img/f.jpg"); 
+    background: url("../img/avatar.png"); 
 
      background-repeat: no-repeat;
      background-size: cover; 
@@ -86,3 +86,4 @@
     /*border: .25vmin solid black;*/
     border-radius: 8px;
 }
+
