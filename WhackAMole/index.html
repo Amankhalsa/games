@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Whack-a-Mole Game</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f0f2f5;
+        text-align: center;
+        padding: 30px;
+    }
+
+    h1 {
+        margin-bottom: 10px;
+    }
+
+    .game-box {
+        width: 350px;
+        margin: auto;
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    #grid {
+        display: grid;
+        grid-template-columns: repeat(3, 100px);
+        grid-gap: 12px;
+        justify-content: center;
+        margin-top: 20px;
+    }
+
+    .hole {
+        width: 100px;
+        height: 100px;
+        background: #8b5a2b;
+        border-radius: 10px;
+        position: relative;
+        cursor: pointer;
+        overflow: hidden;
+    }
+
+    .mole {
+        width: 80px;
+        height: 80px;
+        background: url('https://i.ibb.co/hZyZBVm/mole.png');
+        background-size: cover;
+        position: absolute;
+        bottom: -100px;
+        left: 50%;
+        transform: translateX(-50%);
+        transition: 0.15s;
+    }
+
+    .mole.up {
+        bottom: 5px;
+    }
+
+    #score {
+        font-size: 20px;
+        margin-top: 10px;
+        font-weight: bold;
+    }
+
+    button {
+        padding: 12px 20px;
+        font-size: 18px;
+        border: none;
+        border-radius: 10px;
+        background: #007bff;
+        color: white;
+        cursor: pointer;
+        margin-top: 15px;
+    }
+
+    button:hover {
+        background: #0056b3;
+    }
+</style>
+</head>
+<body>
+
+<h1>Whack-a-Mole 🐹</h1>
+
+<div class="game-box">
+    <p>Hit as many moles as you can in 20 seconds!</p>
+
+    <div id="score">Score: 0</div>
+
+    <button onclick="startGame()">Start Game</button>
+
+    <div id="grid"></div>
+</div>
+
+<script>
+    const grid = document.getElementById("grid");
+    let score = 0;
+    let active = false;
+
+    // Create holes & moles
+    for (let i = 0; i < 9; i++) {
+        const hole = document.createElement("div");
+        hole.classList.add("hole");
+
+        const mole = document.createElement("div");
+        mole.classList.add("mole");
+
+        mole.addEventListener("click", () => {
+            if (mole.classList.contains("up") && active) {
+                score++;
+                document.getElementById("score").textContent = "Score: " + score;
+                mole.classList.remove("up");
+            }
+        });
+
+        hole.appendChild(mole);
+        grid.appendChild(hole);
+    }
+
+    const moles = document.querySelectorAll(".mole");
+
+    function randomHole() {
+        return moles[Math.floor(Math.random() * moles.length)];
+    }
+
+    function showMole() {
+        if (!active) return;
+        const mole = randomHole();
+        mole.classList.add("up");
+
+        setTimeout(() => {
+            mole.classList.remove("up");
+            if (active) showMole();
+        }, 700);
+    }
+
+    function startGame() {
+        score = 0;
+        active = true;
+        document.getElementById("score").textContent = "Score: 0";
+
+        showMole();
+
+        setTimeout(() => {
+            active = false;
+            alert("Time's Up! Your score is: " + score);
+        }, 20000);
+    }
+</script>
+
+</body>
+</html>

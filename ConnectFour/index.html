@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Connect Four</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        background: #eef1f5;
+    }
+
+    h2 {
+        margin-top: 20px;
+    }
+
+    #board {
+        margin: 20px auto;
+        display: grid;
+        grid-template-columns: repeat(7, 80px);
+        grid-gap: 5px;
+        background: #005bbb;
+        padding: 10px;
+        border-radius: 10px;
+    }
+
+    .cell {
+        width: 80px;
+        height: 80px;
+        background: #fff;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .red { background: red; }
+    .yellow { background: gold; }
+
+    #resetBtn {
+        margin-top: 20px;
+        padding: 10px 20px;
+        font-size: 18px;
+        cursor: pointer;
+        border: none;
+        background: #333;
+        color: white;
+        border-radius: 5px;
+    }
+
+    .win {
+        border: 4px solid #00ff00 !important;
+    }
+</style>
+</head>
+<body>
+
+<h2>Connect Four</h2>
+<p id="turnText">Turn: <strong style="color:red">Red</strong></p>
+
+<div id="board"></div>
+
+<button id="resetBtn">Reset Game</button>
+
+<script>
+    const rows = 6;
+    const cols = 7;
+    let board = [];
+    let currentPlayer = "red";
+    const boardDiv = document.getElementById("board");
+    const turnText = document.getElementById("turnText");
+
+    // Create board grid
+    function createBoard() {
+        board = Array.from({ length: rows }, () => Array(cols).fill(null));
+        boardDiv.innerHTML = "";
+
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                const cell = document.createElement("div");
+                cell.classList.add("cell");
+                cell.dataset.row = r;
+                cell.dataset.col = c;
+                cell.onclick = () => dropPiece(c);
+                boardDiv.appendChild(cell);
+            }
+        }
+    }
+
+    function dropPiece(col) {
+        for (let r = rows - 1; r >= 0; r--) {
+            if (!board[r][col]) {
+                board[r][col] = currentPlayer;
+
+                const cell = document.querySelector(`.cell[data-row="${r}"][data-col="${col}"]`);
+                cell.classList.add(currentPlayer);
+
+                if (checkWin(r, col)) {
+                    turnText.innerHTML = `<strong style="color:${currentPlayer}">${currentPlayer.toUpperCase()} WINS!</strong>`;
+                    disableBoard();
+                    return;
+                }
+
+                currentPlayer = currentPlayer === "red" ? "yellow" : "red";
+                turnText.innerHTML = `Turn: <strong style="color:${currentPlayer}">${currentPlayer}</strong>`;
+                return;
+            }
+        }
+    }
+
+    function disableBoard() {
+        document.querySelectorAll(".cell").forEach(c => c.onclick = null);
+    }
+
+    function checkWin(r, c) {
+        const directions = [
+            { dr: 0, dc: 1 },  // horizontal
+            { dr: 1, dc: 0 },  // vertical
+            { dr: 1, dc: 1 },  // diagonal ↘
+            { dr: 1, dc: -1 }  // diagonal ↙
+        ];
+
+        for (let { dr, dc } of directions) {
+            let count = 1;
+            let cells = [[r, c]];
+
+            // check forward
+            let rr = r + dr, cc = c + dc;
+            while (board[rr]?.[cc] === currentPlayer) {
+                count++;
+                cells.push([rr, cc]);
+                rr += dr; cc += dc;
+            }
+
+            // check backward
+            rr = r - dr; cc = c - dc;
+            while (board[rr]?.[cc] === currentPlayer) {
+                count++;
+                cells.push([rr, cc]);
+                rr -= dr; cc -= dc;
+            }
+
+            if (count >= 4) {
+                highlightWin(cells);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function highlightWin(cells) {
+        cells.forEach(([r, c]) => {
+            const cell = document.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
+            cell.classList.add("win");
+        });
+    }
+
+    document.getElementById("resetBtn").onclick = () => {
+        currentPlayer = "red";
+        turnText.innerHTML = `Turn: <strong style="color:red">Red</strong>`;
+        createBoard();
+    };
+
+    createBoard();
+</script>
+
+</body>
+</html>

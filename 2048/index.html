@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>2048 Game</title>
+<style>
+  body {
+    background: #faf8ef;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin: 0;
+  }
+  h1 { margin-top: 20px; font-size: 40px; color: #776e65; }
+
+  #game {
+    width: 400px;
+    height: 400px;
+    background: #bbada0;
+    margin: 40px auto;
+    padding: 10px;
+    border-radius: 6px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+
+  .tile {
+    width: 90px;
+    height: 90px;
+    background: #cdc1b4;
+    font-size: 32px;
+    font-weight: bold;
+    color: #776e65;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 3px;
+  }
+
+  .n2  { background: #eee4da; }
+  .n4  { background: #ede0c8; }
+  .n8  { background: #f2b179; color: white;}
+  .n16 { background: #f59563; color: white;}
+  .n32 { background: #f67c5f; color: white;}
+  .n64 { background: #f65e3b; color: white;}
+  .n128{ background: #edcf72; color: white; font-size: 28px;}
+  .n256{ background: #edcc61; color: white; font-size: 28px;}
+  .n512{ background: #edc850; color: white; font-size: 28px;}
+  .n1024{ background: #edc53f; color: white; font-size: 24px;}
+  .n2048{ background: #edc22e; color: white; font-size: 24px;}
+</style>
+</head>
+<body>
+
+<h1>2048 Puzzle</h1>
+<div id="game"></div>
+
+<script>
+let board = [
+  [0,0,0,0],
+  [0,0,0,0],
+  [0,0,0,0],
+  [0,0,0,0]
+];
+
+function startGame() {
+  addRandom();
+  addRandom();
+  drawBoard();
+}
+
+function drawBoard() {
+  const game = document.getElementById("game");
+  game.innerHTML = "";
+  board.forEach(row => {
+    row.forEach(num => {
+      const tile = document.createElement("div");
+      tile.classList.add("tile");
+      if (num !== 0) {
+        tile.classList.add("n" + num);
+        tile.textContent = num;
+      }
+      game.appendChild(tile);
+    });
+  });
+}
+
+function addRandom() {
+  let emptyCells = [];
+  for (let r=0; r<4; r++) {
+    for (let c=0; c<4; c++) {
+      if (board[r][c] === 0) emptyCells.push({r,c});
+    }
+  }
+  if (emptyCells.length === 0) return;
+  let {r,c} = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+  board[r][c] = Math.random() < 0.9 ? 2 : 4;
+}
+
+function slide(row) {
+  row = row.filter(num => num);
+  for (let i=0; i<row.length-1; i++) {
+    if (row[i] === row[i+1]) {
+      row[i] *= 2;
+      row[i+1] = 0;
+    }
+  }
+  row = row.filter(num => num);
+  while (row.length < 4) row.push(0);
+  return row;
+}
+
+function rotateLeft() {
+  board = board[0].map((_, i) => board.map(row => row[i]));
+}
+
+function rotateRight() {
+  board = board[0].map((_, i) => board.map(row => row[3 - i]));
+}
+
+function moveLeft() {
+  let old = JSON.stringify(board);
+  board = board.map(row => slide(row));
+  if (JSON.stringify(board) !== old) addRandom();
+  drawBoard();
+}
+
+function moveRight() {
+  let old = JSON.stringify(board);
+  board = board.map(row => slide(row.reverse()).reverse());
+  if (JSON.stringify(board) !== old) addRandom();
+  drawBoard();
+}
+
+function moveUp() {
+  rotateLeft();
+  moveLeft();
+  rotateRight();
+}
+
+function moveDown() {
+  rotateLeft();
+  moveRight();
+  rotateRight();
+}
+
+document.addEventListener("keydown", e => {
+  if (e.key === "ArrowLeft") moveLeft();
+  if (e.key === "ArrowRight") moveRight();
+  if (e.key === "ArrowUp") moveUp();
+  if (e.key === "ArrowDown") moveDown();
+});
+
+startGame();
+</script>
+
+</body>
+</html>

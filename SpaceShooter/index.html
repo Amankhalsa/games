@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Space Shooter</title>
+<style>
+    body {
+        margin: 0;
+        overflow: hidden;
+        background: black;
+        color: white;
+        font-family: Arial, sans-serif;
+    }
+
+    #gameArea {
+        width: 100vw;
+        height: 100vh;
+        position: relative;
+        overflow: hidden;
+        background: radial-gradient(circle, #111 30%, #000 100%);
+    }
+
+    #player {
+        width: 40px;
+        height: 40px;
+        background: cyan;
+        position: absolute;
+        bottom: 20px;
+        left: calc(50% - 20px);
+        border-radius: 5px;
+    }
+
+    .bullet {
+        width: 5px;
+        height: 15px;
+        background: yellow;
+        position: absolute;
+        border-radius: 2px;
+    }
+
+    .enemy {
+        width: 40px;
+        height: 40px;
+        background: red;
+        position: absolute;
+        top: -50px;
+        border-radius: 5px;
+    }
+
+    #score {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        font-size: 22px;
+        font-weight: bold;
+    }
+</style>
+</head>
+<body>
+
+<div id="gameArea">
+    <div id="player"></div>
+    <div id="score">Score: 0</div>
+</div>
+
+<script>
+const gameArea = document.getElementById("gameArea");
+const player = document.getElementById("player");
+const scoreText = document.getElementById("score");
+
+let score = 0;
+let playerX = window.innerWidth / 2 - 20;
+let bullets = [];
+let enemies = [];
+
+// PLAYER MOVEMENT
+document.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowLeft" && playerX > 0) {
+        playerX -= 20;
+    }
+    if (e.key === "ArrowRight" && playerX < window.innerWidth - 40) {
+        playerX += 20;
+    }
+    if (e.key === " ") shootBullet();
+    player.style.left = playerX + "px";
+});
+
+// SHOOT BULLET
+function shootBullet() {
+    const bullet = document.createElement("div");
+    bullet.classList.add("bullet");
+    bullet.style.left = (playerX + 18) + "px";
+    bullet.style.top = (window.innerHeight - 80) + "px";
+    gameArea.appendChild(bullet);
+    bullets.push(bullet);
+}
+
+// SPAWN ENEMIES
+function spawnEnemy() {
+    const enemy = document.createElement("div");
+    enemy.classList.add("enemy");
+    enemy.style.left = Math.random() * (window.innerWidth - 40) + "px";
+    enemy.style.top = "-40px";
+    gameArea.appendChild(enemy);
+    enemies.push(enemy);
+}
+setInterval(spawnEnemy, 1200);
+
+// GAME LOOP
+function gameLoop() {
+    // Move bullets
+    bullets.forEach((bullet, i) => {
+        bullet.style.top = (parseInt(bullet.style.top) - 8) + "px";
+        if (parseInt(bullet.style.top) < -20) {
+            bullet.remove();
+            bullets.splice(i, 1);
+        }
+    });
+
+    // Move enemies
+    enemies.forEach((enemy, i) => {
+        enemy.style.top = (parseInt(enemy.style.top) + 3) + "px";
+
+        // Remove enemy if it goes out
+        if (parseInt(enemy.style.top) > window.innerHeight + 40) {
+            enemy.remove();
+            enemies.splice(i, 1);
+        }
+
+        // Collision check
+        bullets.forEach((bullet, j) => {
+            const bRect = bullet.getBoundingClientRect();
+            const eRect = enemy.getBoundingClientRect();
+
+            if (
+                bRect.left < eRect.left + eRect.width &&
+                bRect.left + bRect.width > eRect.left &&
+                bRect.top < eRect.top + eRect.height &&
+                bRect.height + bRect.top > eRect.top
+            ) {
+                enemy.remove();
+                bullet.remove();
+                enemies.splice(i, 1);
+                bullets.splice(j, 1);
+
+                score++;
+                scoreText.innerText = "Score: " + score;
+            }
+        });
+    });
+
+    requestAnimationFrame(gameLoop);
+}
+gameLoop();
+</script>
+
+</body>
+</html>
